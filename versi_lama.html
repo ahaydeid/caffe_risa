@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KDS + Riwayat & Total - Monitor Dapur Kedai Moods</title>
+    <title>KDS + Riwayat - Monitor Dapur Kedai Moods</title>
     <style>
         * {
             margin: 0;
@@ -114,23 +115,6 @@
             border-radius: 4px; text-transform: uppercase;
         }
 
-        /* KOTAK RINGKASAN TOTAL JUMLAH */
-        .summary-wrapper {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-        .summary-card {
-            background: #1e1e24;
-            padding: 15px;
-            border-radius: 6px;
-            flex: 1;
-            border: 1px solid #3f4451;
-            text-align: center;
-        }
-        .summary-card p { font-size: 0.9rem; color: #a4b0be; margin-bottom: 5px; }
-        .summary-card h4 { font-size: 1.5rem; color: #2ed573; }
-
         /* SECTION RIWAYAT */
         .history-box {
             background: #2f3542;
@@ -185,11 +169,13 @@
         <div class="time" id="live-clock">00:00:00</div>
     </header>
 
+    <!-- BOX SIMULATOR KASIR -->
     <div class="simulator-box">
         <h3>[Simulator Kasir] Kirim Pesanan Baru ke Dapur:</h3>
         <input type="text" id="sim-meja" placeholder="No. Meja / Antrean" style="width: 120px;">
         
         <select id="sim-menu">
+            <!-- ================= MAKANAN & SNACK (LALAPAN) ================= -->
             <optgroup label="ANEKA CIRENG">
                 <option value="Cireng Ayam" data-harga="10000">Cireng Ayam (10k)</option>
                 <option value="Cireng Keju" data-harga="10000">Cireng Keju (10k)</option>
@@ -197,7 +183,7 @@
                 <option value="Cireng Chili Oil" data-harga="10000">Cireng Chili Oil (10k)</option>
                 <option value="Cireng Rujak" data-harga="10000">Cireng Rujak (10k)</option>
                 <option value="Cireng Kuah Kaldu" data-harga="10000">Cireng Kuah Kaldu (10k)</option>
-                <option value="Cireng Kuah Creamy" data-harga="10000">Cireng Kuah Creamy (10k)</option>
+                <option value="Cireng Kuah Creamy" data-harga="15000">Cireng Kuah Creamy (15k)</option>
                 <option value="Cireng Gochujang" data-harga="10000">Cireng Gochujang (10k)</option>
             </optgroup>
             <optgroup label="TOAST">
@@ -249,6 +235,7 @@
                 <option value="Kul-Kul" data-harga="5000">Kul-Kul (5k)</option>
             </optgroup>
 
+            <!-- ================= MOODS COFFEE ================= -->
             <optgroup label="MOODS COFFEE">
                 <option value="Americano" data-harga="8000">Americano (8k)</option>
                 <option value="Creamy Aren" data-harga="13000">Creamy Aren (13k)</option>
@@ -260,6 +247,7 @@
                 <option value="Pandan Latte" data-harga="13000">Pandan Latte (13k)</option>
             </optgroup>
 
+            <!-- ================= MILK SERIES ================= -->
             <optgroup label="MILK SERIES">
                 <option value="Ocean Blue Milk" data-harga="10000">Ocean Blue Milk (10k)</option>
                 <option value="Raspberry Milk" data-harga="10000">Raspberry Milk (10k)</option>
@@ -272,6 +260,7 @@
                 <option value="Chocolate Milk" data-harga="10000">Chocolate Milk (10k)</option>
             </optgroup>
 
+            <!-- ================= YAKULT SERIES ================= -->
             <optgroup label="YAKULT SERIES">
                 <option value="Raspbery Yakult" data-harga="12000">Raspbery Yakult (12k)</option>
                 <option value="Manggo Yakult" data-harga="12000">Manggo Yakult (12k)</option>
@@ -281,6 +270,7 @@
                 <option value="Blue Yakult" data-harga="12000">Blue Yakult (12k)</option>
             </optgroup>
 
+            <!-- ================= MINUMAN ================= -->
             <optgroup label="MINUMAN">
                 <option value="Thai Tea" data-harga="10000">Thai Tea (10k)</option>
                 <option value="Green Tea" data-harga="10000">Green Tea (10k)</option>
@@ -297,23 +287,13 @@
         <button onclick="kirimKeDapur()">KIRIM KE DAPUR ➡️</button>
     </div>
 
+    <!-- AREA MONITOR TIKET AKTIF -->
     <h2 class="section-title">Pesanan Antrean Aktif (Dapur)</h2>
     <div class="kds-grid" id="kds-area"></div>
 
+    <!-- AREA RIWAYAT PEMBELIAN -->
     <div class="history-box">
         <h2 class="section-title" style="color:#2ed573; border-left-color:#2ed573;">Riwayat Pesanan Selesai / Terkirim</h2>
-        
-        <div class="summary-wrapper">
-            <div class="summary-card">
-                <p>🛍️ TOTAL ITEM TERJUAL</p>
-                <h4 id="total-qty-terjual" style="color: #ffa502;">0 Porsi</h4>
-            </div>
-            <div class="summary-card">
-                <p>💰 TOTAL PENDAPATAN (OMZET)</p>
-                <h4 id="total-omzet">Rp 0</h4>
-            </div>
-        </div>
-
         <table class="history-table">
             <thead>
                 <tr>
@@ -333,10 +313,6 @@
     <script>
         let orderCount = 101;
         let dataTiketAktif = {};
-        
-        // Variabel penampung jumlah hitungan total akumulasi
-        let akumulasiOmzet = 0;
-        let akumulasiQty = 0;
 
         // Jam Digital
         setInterval(() => {
@@ -408,17 +384,9 @@
                 tiket.style.transition = "transform 0.3s ease";
                 
                 setTimeout(() => {
-                    const data = dataTiketAktif[id] || { meja: "-", menu: "Menu", qty: 0, notes: "-", totalHarga: 0 };
+                    const data = dataTiketAktif[id] || { meja: "-", menu: "Menu", qty: 1, notes: "-", totalHarga: 0 };
                     const waktuSelesai = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
                     
-                    // PROSES HITUNG OTOMATIS TAMBAH JUMLAH
-                    akumulasiOmzet += data.totalHarga;
-                    akumulasiQty += data.qty;
-
-                    // Update tulisan angka jumlah di layar secara real-time
-                    document.getElementById('total-omzet').innerText = "Rp " + akumulasiOmzet.toLocaleString('id-ID');
-                    document.getElementById('total-qty-terjual').innerText = akumulasiQty + " Porsi";
-
                     const historyArea = document.getElementById('history-area');
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -438,8 +406,9 @@
             }
         }
 
+        // Bagian ini sekarang kosong agar tidak memunculkan pesanan bawaan saat loading awal
         window.onload = function() {
-            // Bersih tanpa dummy data awal
+            // Bersih tanpa dummy data
         };
     </script>
 </body>
